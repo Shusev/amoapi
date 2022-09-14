@@ -15,14 +15,15 @@ class QueryCollection extends \Ufee\Amo\Base\Collections\Collection
 	protected static $_cache_path = AMOAPI_ROOT.'/Cache';
     protected 
         $instance,
-		$instanceName,
-		$cache_path,
+        $instanceName,
+        $cache_path,
         $delay = 0.15,
+        $refresh_time = 900,
         $cookie_file,
         $_listener,
         $logger = null,
         $_logs = false,
-		$_cache_initialized = false;
+        $_cache_initialized = false;
     
     /**
      * Boot instance
@@ -57,6 +58,15 @@ class QueryCollection extends \Ufee\Amo\Base\Collections\Collection
     public function setDelay($value)
     {
         $this->delay = $value;
+    }
+	
+    /**
+     * Get token refresh time
+     * @return integer
+     */
+    public function getRefreshTime()
+    {
+        return $this->refresh_time;
     }
 
     /**

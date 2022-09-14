@@ -53,6 +53,10 @@ class Oauthapi extends ApiClient
 	 */
 	public function getOauth($key = null)
 	{
+		if (is_bool($key) && $key === true) {
+			$this->getOauthStorage()->initClient($this);
+			$key = null;
+		}
 		return $this->getOauthStorage()->getOauthData($this, $key);
 	}
 	
@@ -127,7 +131,10 @@ class Oauthapi extends ApiClient
 				'grant_type' => 'refresh_token',
 				'refresh_token' => $refresh_token
 			  ]);
+		$query->setStartTime(microtime(true));
 		$response = new \Ufee\Amo\Api\Response($query->post(), $query);
+		$query->setEndTime(microtime(true));
+		
 		if (!$data = $response->parseJson()) {
 			$e = new \Exception('Refresh access token failed (non JSON), code: '.$response->getCode(), $response->getCode());
 		}
@@ -139,7 +146,7 @@ class Oauthapi extends ApiClient
 		}
 		if ($e) {
 			if (is_callable($this->_token_refresh_error_callback)) {
-				call_user_func($this->_token_refresh_error_callback, $e);
+				call_user_func($this->_token_refresh_error_callback, $e, $query, $response);
 			} else {
 				throw $e;
 			}
@@ -148,7 +155,7 @@ class Oauthapi extends ApiClient
 			$oauth['created_at'] = time();
 			
 			if (is_callable($this->_token_refresh_callback)) {
-				call_user_func($this->_token_refresh_callback, $oauth);
+				call_user_func($this->_token_refresh_callback, $oauth, $query, $response);
 			}
 			$this->setOauth($oauth);
 		}
@@ -248,10 +255,10 @@ class Oauthapi extends ApiClient
 		foreach ($account as $key=>$val) {
 			$account[$key] = isset($data[$key]) ? $data[$key] : $val;
 		}
-		self::$_instances[$account['client_id']] = new static($account);
-		$instance = self::getInstance($account['client_id']);
-		self::$_queries[$account['client_id']] = new Collections\QueryCollection();
-		self::$_queries[$account['client_id']]->boot($instance);
+		$instance = new static($account);
+		self::$_instances[$account['client_id']] = $instance;
+		self::$_queries[$account['domain'].$account['client_id']] = new Collections\QueryCollection();
+		self::$_queries[$account['domain'].$account['client_id']]->boot($instance);
 		return $instance;
 	}
 

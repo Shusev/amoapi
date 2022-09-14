@@ -11,8 +11,8 @@ class LimitedList extends Cached
 	use Traits\EntityDetector;
 	
 	protected $entity_collection = '\Ufee\Amo\Base\Collections\ApiModelCollection';
-	protected $limit_rows_add = 300;
-	protected $limit_rows_update = 300;
+	protected $limit_rows_add = 50;
+	protected $limit_rows_update = 50;
 	protected $limit_rows = 500;
 	protected $max_rows = 0;
 	protected $modified_from = false;
@@ -27,7 +27,7 @@ class LimitedList extends Cached
 	protected function _boot()
 	{
 		$this->api_args = [
-			'lang' => $this->instance->getAuth('lang')
+			//'lang' => $this->instance->getAuth('lang')
 		];
 	}
 
